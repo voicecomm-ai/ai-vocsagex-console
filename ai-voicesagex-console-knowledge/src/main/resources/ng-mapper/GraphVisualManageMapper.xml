@@ -1,0 +1,95 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphVisualManageMapper">
+  <nql id="getRandNumber" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v)
+    RETURN v LIMIT 5;
+  </nql>
+
+
+  <nql id="getEntityInfo" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v)
+    WhERE id(v) == "${entityId}"
+    RETURN v;
+  </nql>
+
+
+  <nql id="getOneStepsInfo" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    GO ${step} STEPS from
+    "${entityId}" OVER ${es} BIDIRECT
+    YIELD dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,rank(edge) AS rank;
+  </nql>
+
+  <nql id="getOneStepsInfoVector" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    GO ${step} STEPS from
+    "${entityId}" OVER ${es} BIDIRECT
+    YIELD dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,properties(edge) as e;
+  </nql>
+
+  <nql id="getOneStepsInfoReverse" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    GO ${step} STEPS from
+    "${entityId}" OVER ${es} REVERSELY
+    YIELD dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,rank(edge) AS rank;
+  </nql>
+
+  <nql id="getOneStepsInfoForward" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    GO ${step} STEPS from
+    "${entityId}" OVER ${es}
+    YIELD dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,rank(edge) AS rank;
+  </nql>
+
+
+  <nql id="getTagNameMap" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    MATCH (v) WHERE id(v) in ${ids} RETURN id(v) as id , tags(v) as tagList,properties(v).NAME as
+    NAME;
+  </nql>
+
+
+  <nql id="selectVertexInfo" space="${ like.spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    MATCH (v)
+    WHERE 1 == 1
+    @if ( isNotEmpty( like.vertexName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower( $like.vertexName )
+    @}
+    RETURN properties(v).NAME as NAME ,id(v) as id,tags(v) as tagList ORDER BY NAME ASC ;
+  </nql>
+
+  <nql id="singleVertexInfo" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v) WHERE id(v) == "${vertexId}" RETURN v;
+  </nql>
+
+
+  <nql id="queryFullGraph" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgSubgraph">
+    GET SUBGRAPH 1 STEPS FROM "${vertexId}"
+    YIELD VERTICES AS nodes, EDGES AS relationships;
+  </nql>
+
+
+  <nql id="queryFullGraphNext" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgSubgraph">
+    GET SUBGRAPH 1 STEPS FROM "${vertexId}" OUT
+    YIELD VERTICES AS nodes, EDGES AS relationships;
+  </nql>
+
+
+  <nql id="expansionNode" space="${ ex.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgSubgraph">
+    GET SUBGRAPH ${ex.stepNumber} STEPS FROM ${ex.vertexInfoVOList} ${ex.direction}
+    ${ex.edgeNameList}
+    YIELD VERTICES AS nodes, EDGES AS relationships;
+  </nql>
+
+  <nql id="queryPath" space="${ qu.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgPath">
+    Find ${qu.queryType} path from "${qu.startId}" to "${qu.endId}" over ${qu.edgeNameList}
+    ${qu.direction} UPTO ${qu.stepInterval} STEPS YIELD path AS p;
+  </nql>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.user.dao.mapper.user.BackendDepartmentMapper">
+  <resultMap id="BaseResultMap"
+    type="cn.voicecomm.ai.voicesagex.console.util.po.user.DepartmentPo">
+    <!--@mbg.generated-->
+    <!--@Table backend_department-->
+    <id column="id" jdbcType="INTEGER" property="id"/>
+    <result column="department_name" jdbcType="VARCHAR" property="departmentName"/>
+    <result column="level" jdbcType="INTEGER" property="level"/>
+    <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    <result column="parent_id" jdbcType="INTEGER" property="parentId"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    <result column="create_by" jdbcType="INTEGER" property="createBy"/>
+    <result column="update_by" jdbcType="INTEGER" property="updateBy"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, department_name, "level", remark, parent_id, create_time, update_time, create_by,
+    update_by
+  </sql>
+
+
+  <select id="listChildDept" resultMap="BaseResultMap">
+    WITH recursive tempChild AS (SELECT *
+    FROM department
+    WHERE id = #{id,jdbcType=INTEGER}
+    UNION ALL
+    SELECT u.*
+    FROM department u,
+    tempChild t
+    WHERE u.parent_id = t.id)
+    SELECT *
+    FROM tempChild
+    <where>
+      <if test="includeSelf != null and includeSelf == 0">
+        and id != #{id,jdbcType=INTEGER}
+      </if>
+    </where>
+    order by id;
+  </select>
+
+
+  <select id="listParentDept" resultMap="BaseResultMap">
+    WITH recursive tempParent AS (SELECT *
+    FROM department
+    WHERE id = #{id,jdbcType=INTEGER}
+    UNION ALL
+    SELECT u.*
+    FROM department u,
+    tempParent t
+    WHERE u.id = t.parent_id)
+    SELECT *
+    FROM tempParent
+    <where>
+      <if test="includeSelf != null and includeSelf == 0">
+        and id != #{id,jdbcType=INTEGER}
+      </if>
+    </where>
+    order by id;
+  </select>
+</mapper>

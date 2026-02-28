@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: ai-voicesagex-console-sql
+  cloud:
+    nacos:
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        username: ${NACOS_NAMESPACE:}
+        password: ${NACOS_GROUP:DEFAULT_GROUP}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}

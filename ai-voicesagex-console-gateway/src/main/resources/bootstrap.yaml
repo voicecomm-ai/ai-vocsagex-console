@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: ai-voicesagex-console-gateway
+  cloud:
+    nacos:
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        username: ${NACOS_NAMESPACE:}
+        password: ${NACOS_GROUP:DEFAULT_GROUP}
+        shared-configs:
+          - data-id: ai-voicesagex-console-redis.yaml
+            group: ${NACOS_GROUP:DEFAULT_GROUP}
+            refresh: true
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        username: ${NACOS_NAMESPACE:}
+        password: ${NACOS_GROUP:DEFAULT_GROUP}
+    gateway:
+      # 设置与服务注册发现组件结合，这样可以采用服务名的路由策略
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: ai-voicesagex-console-authorization
+          uri: lb://ai-voicesagex-console-authorization
+          predicates:
+            - Path=/voicesagex-console/authorization-web/**
+        - id: ai-voicesagex-console-user
+          uri: lb://ai-voicesagex-console-user
+          predicates:
+            - Path=/voicesagex-console/user-web/**
+        - id: ai-voicesagex-console-application
+          uri: lb://ai-voicesagex-console-application
+          predicates:
+            - Path=/voicesagex-console/application-web/**
+        - id: ai-voicesagex-console-knowledge
+          uri: lb://ai-voicesagex-console-knowledge
+          predicates:
+            - Path=/voicesagex-console/knowledge-web/**
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}

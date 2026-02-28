@@ -1,0 +1,223 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphVertexMapper">
+
+    <nql id = "deleteVertex" space="${ tex.space }" spaceFromParam="true">
+        DELETE VERTEX ${tex.vids} WITH EDGE
+    </nql>
+
+    <nql id = "deleteVertexAll" space="${ spaceId }" spaceFromParam="true">
+        DELETE VERTEX ${ids} WITH EDGE
+    </nql>
+
+
+    <nql id = "deleteVertexSingle" space="${ spaceId }" spaceFromParam="true">
+        DELETE VERTEX "${id}" ;
+    </nql>
+
+
+
+
+    <nql id = "saveEntity" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX   ${tex.entityProperties} VALUES "${tex.vid}": (${tex.entityValue});
+    </nql>
+
+    <nql id = "saveEntityImport" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX `${tex.tagName}`  (${tex.entityProperties}) VALUES "${tex.vid}": (${tex.entityValue});
+    </nql>
+
+
+    <nql id = "saveEntityBath" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX `${tex.tagName}`  (${tex.entityProperties}) VALUES ${tex.entityPropertiesBath};
+    </nql>
+
+    <nql id = "updateEntity" space="${ tex.spaceId }" spaceFromParam="true">
+        UPDATE VERTEX ON `${tex.tagName}` "${tex.vid}"
+        SET ${tex.entityProperties}
+    </nql>
+
+    <nql id = "saveSubject" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX `${tex.tagName}`(NAME) VALUES "${tex.vid}": ( ${tex.name});
+    </nql>
+
+
+
+    <nql id = "executeTheTask" space="${spaceId}" spaceFromParam="true" resultType ="java.lang.Integer">
+        SUBMIT JOB STATS
+    </nql>
+
+    <nql id = "getStatsInfo" space="${spaceId}" spaceFromParam="true" resultType ="com.vesoft.nebula.client.graph.data.ResultSet">
+        Show stats
+    </nql>
+
+
+
+
+    <nql id = "saveObject" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX `${tex.tagName}`(NAME) VALUES "${tex.vid}": ( ${tex.name});
+    </nql>
+
+
+    <nql id = "getEntity" space="${ spaceId }" spaceFromParam="true">
+        MATCH (v) WHERE id(v) == "${entityId}"  RETURN v;
+    </nql>
+
+    <nql id = "getEntitySet" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v) WHERE id(v) in  ${entitys}  RETURN v;
+    </nql>
+
+
+    <nql id = "getNgvertexs" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v)
+        RETURN v, properties(v).NAME as name   ORDER BY name ASC;
+    </nql>
+
+    <nql id = "getNgvertexsExport" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v)
+        WHERE 1 == 1
+        @if ( isNotEmpty( entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+        @}
+        RETURN v, properties(v).NAME as name , id(v) as id   ORDER BY id DESC ;
+    </nql>
+
+
+
+    <nql id = "getNgvertexsByName" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v:${tagName})
+        WHERE 1 == 1
+        @if ( isNotEmpty( entityName ) ) {
+        AND lower(properties(v).NAME) == lower('${entityName}')
+        @}
+        RETURN v, properties(v).NAME as name , id(v) as id;
+    </nql>
+
+
+
+    <nql id = "getVertexesByTagName" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v:`${tagName}`)
+        WHERE 1 == 1
+        @if ( isNotEmpty( entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+        @}
+        RETURN v , properties(v).NAME as name   ORDER BY name ASC;
+    </nql>
+
+    <nql id = "getVertexesByTagNameExport" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v:`${tagName}`)
+        WHERE 1 == 1
+        @if ( isNotEmpty( entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+        @}
+        RETURN v ,  properties(v).NAME as name , id(v) as id   ORDER BY id DESC ;
+    </nql>
+
+    <nql id = "getSelectNgvertexs" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v)
+        WHERE id(v) IN  ${ ids }
+        RETURN v , id(v) as id   ORDER BY id DESC;
+    </nql>
+
+
+    <nql id = "getAllNgvertexs" space="${ tex.spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v)
+        WHERE 1 == 1
+        @if ( isNotEmpty( tex.entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${tex.entityName}')
+        @}
+        RETURN v, properties(v).NAME as name , id(v) as id   ORDER BY id DESC  skip  ${ tex.current }   limit  ${ tex.pageSize } ;
+    </nql>
+
+
+    <nql id = "getEntityTotal" space="${ tex.spaceId }" spaceFromParam="true" resultType ="java.lang.Integer">
+        MATCH (v)
+        WHERE 1 == 1
+        @if ( isNotEmpty( tex.entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${tex.entityName}')
+        @}
+        RETURN count(*) as total;
+    </nql>
+
+
+    <nql id = "getEntityTotalBySpaceId" space="${ spaceId }" spaceFromParam="true" resultType ="java.lang.Integer">
+        MATCH (v)
+        RETURN count(*) as total;
+    </nql>
+
+    <nql id = "getEntityTotalByTagName" space="${ tex.spaceId }" spaceFromParam="true" resultType ="java.lang.Integer">
+        MATCH (v:`${tex.tagName}`)
+        WHERE 1 == 1
+        @if ( isNotEmpty( tex.entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${tex.entityName}')
+        @}
+        RETURN count(*) as total;
+    </nql>
+
+    <nql id = "getEntityTotalByProperty" space="${spaceId }" spaceFromParam="true" resultType ="com.vesoft.nebula.client.graph.data.ResultSet">
+        MATCH (v:`${tagName}`)
+        RETURN ${propertyName} ;
+    </nql>
+
+
+    <nql id = "getEntityTotalByAllProperty" space="${spaceId }" spaceFromParam="true" resultType ="com.vesoft.nebula.client.graph.data.ResultSet">
+        MATCH (v:`${tagName}`)
+        RETURN properties(v) as pro,labels(v) AS t;
+    </nql>
+
+
+    <nql id = "getAllNgvertexsByName" space="${ tex.spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v:`${tex.tagName}`)
+        WHERE 1 == 1
+        @if ( isNotEmpty( tex.entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${tex.entityName}')
+        @}
+        RETURN v, properties(v).NAME as name, id(v) as id    ORDER BY id DESC   skip  ${ tex.current }   limit  ${ tex.pageSize } ;
+    </nql>
+
+    <nql id = "getNumber" space="${ spaceId }" spaceFromParam="true" resultType ="java.lang.Integer">
+        LOOKUP ON `${tagName}` YIELD id(vertex)|
+        YIELD COUNT(*) ;
+    </nql>
+
+    <nql id = "getShowStuta" space="${ spaceId }" spaceFromParam="true" resultType ="com.vesoft.nebula.client.graph.data.ResultSet">
+        SHOW STATS;
+    </nql>
+
+    <nql id = "selectLikeEntity" space="${ spaceId }" spaceFromParam="true" resultType ="com.vesoft.nebula.client.graph.data.ResultSet">
+        MATCH (v:`${tagName}`)
+        WHERE 1 == 1
+        @if ( isNotEmpty( entityName ) ) {
+        AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+        @}
+        RETURN properties(v).NAME as NAME ,id(v) as id
+    </nql>
+
+    <nql id = "getVertexLimit" space="${ spaceId }" spaceFromParam="true" resultType ="org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v) RETURN  v LIMIT 1;
+    </nql>
+
+
+    <nql id = "saveEntityFusion" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX ${tex.entityProperties} VALUES "${tex.vid}": (${tex.entityValue});
+    </nql>
+
+
+    <nql id = "saveEntityVerification" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX ${tex.tag} (${tex.name}) VALUES "${tex.vid}": (${tex.entityValue});
+    </nql>
+
+
+    <nql id = "batchSaveEntityVerification" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX ${tex.tag} (`NAME`) VALUES ${tex.value};
+    </nql>
+
+    <nql id = "batchSaveEntityDocument" space="${ tex.spaceId }" spaceFromParam="true">
+        INSERT VERTEX ${tex.tag} (${tex.name}) VALUES ${tex.value};
+    </nql>
+
+    <nql id = "getDocumentName" space="${ spaceId }" spaceFromParam="true">
+        MATCH (v)-[e:`${edgeName}`]->(v1)
+        WHERE 1 == 1 AND  properties(v).NAME == '${value}'
+        RETURN properties(v1).NAME;
+    </nql>
+
+
+</mapper>

@@ -1,0 +1,78 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphEdgeManageMapper">
+<!--    <nql id = "createEdge" space="${ edge.space }" spaceFromParam="true">-->
+<!--        CREATE EDGE  IF NOT EXISTS ${ edge.tagName }${ edge.properties }-->
+<!--        @if ( isNotEmpty( "${ edge.ttlCol }" ) ) {-->
+<!--        TTL_DURATION = ${edge.ttlDuration}, TTL_COL = "${edge.ttlCol}" ;-->
+<!--        @}-->
+<!--    </nql>-->
+
+
+    <nql id = "createEdge" space="${ edge.space }" spaceFromParam="true">
+        CREATE EDGE  IF NOT EXISTS `${ edge.tagName }` ${ edge.properties }
+    </nql>
+
+
+    <nql id = "createEdgeDocument" space="${ spaceId }" spaceFromParam="true">
+        CREATE EDGE  IF NOT EXISTS `${ edge }`(NAME STRING);
+    </nql>
+
+
+    <nql id = "getAllEdges" space="${ edge.space }" spaceFromParam="true" >
+        SHOW  EDGES;
+    </nql>
+
+    <nql id = "getEdgeInfo" space="${ edge.space }" spaceFromParam="true"  resultType = "java.lang.String">
+        DESC  EDGE `${ edge.tagName }`
+    </nql>
+
+    <nql id = "dropEdge" space="${ edge.space }" spaceFromParam="true" >
+        DROP EDGE IF EXISTS  `${ edge.tagName }`;
+    </nql>
+
+
+    <nql id = "createIndexDefault" space="${ index.space }" spaceFromParam="true">
+        CREATE EDGE  INDEX IF NOT EXISTS `${ index.index }` ON `${ index.tagEdgeName }`(NAME(10));
+
+    </nql>
+
+    <nql id = "alterEdge" space="${ edge.space }" spaceFromParam="true">
+        ALTER EDGE `${ edge.tagName }` ADD (${ edge.properties });
+    </nql>
+
+    <nql id = "setTtl" space="${ edge.space }" spaceFromParam="true">
+        ALTER Edge `${ edge.tagName }` TTL_DURATION = ${edge.ttlDuration}, TTL_COL = "${edge.ttlCol}" ;
+    </nql>
+
+    <nql id = "dropIndex" space="${ edge.space }" spaceFromParam="true" >
+        DROP EDGE INDEX `${ edge.index }`;
+    </nql>
+
+
+    <nql id = "dropTagEdgeProperty" space="${ edge.space }" spaceFromParam="true" >
+        ALTER Edge `${ edge.tagName }`  drop (`${ edge.propertyName }`);
+    </nql>
+
+    <nql id = "updateTagEdgeProperty" space="${ edge.space }" spaceFromParam="true" >
+        ALTER EDGE `${ edge.tagName }`  CHANGE (${edge.properties});
+    </nql>
+
+    <nql id = "dropTagEdgeTtl" space="${ edge.space }" spaceFromParam="true">
+        ALTER EDGE `${ edge.tagName }` TTL_DURATION = 0, TTL_COL = "";
+    </nql>
+
+    <nql id = "getEdgesPattern" space="${spaceId }" spaceFromParam="true" >
+        SHOW  EDGES;
+    </nql>
+
+
+    <nql id = "getEdgeForTag" space="${spaceId}" spaceFromParam="true"  resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+        MATCH (v)-[e: ${edge}]->(v1)
+        WHERE 1 == 1 AND  properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+        RETURN e LIMIT 10 ;
+    </nql>
+
+    <nql id = "getTagForId" space="${ spaceId }" spaceFromParam="true" resultType = "java.lang.String">
+        MATCH (v) WHERE id(v) == ${id}  RETURN tags(v) as tagName;
+    </nql>
+
+</mapper>

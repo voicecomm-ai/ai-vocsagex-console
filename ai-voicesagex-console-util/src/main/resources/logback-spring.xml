@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- 配置参数envName读取application.yml中的spring.profiles.active属性，如果没有配置，默认info -->
+  <springProperty scope="context" name="envName" source="spring.profiles.active"
+    defaultValue="dev"/>
+  <springProperty scope="context" name="moduleName" source="spring.application.name"/>
+  <!-- 文件输出格式 -->
+
+  <!-- 控制台输出格式 - 带颜色 -->
+  <property name="PATTERN_CONSOLE"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %boldWhite(|) %boldMagenta([%thread]) %boldWhite(|) %cyan(%logger{20}) %yellow(%M:%L) %gray(:) %msg%n"/>
+
+  <!-- 文件输出格式 - 无颜色 -->
+  <property name="PATTERN_LOG"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level | [%thread] | %logger{20} %M:%L : %msg%n"/>
+
+  <!-- 文件路径 -->
+  <property name="FILE_PATH"
+    value="./data1/logs/${envName}/ai-voicesagex-console/${moduleName}/"/>
+
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${PATTERN_CONSOLE}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 按照每天生成日志文件（所有） -->
+  <appender name="FILE"
+    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>${FILE_PATH}/all/${moduleName}.%d{yyyy-MM-dd}-%i.log
+      </FileNamePattern>
+      <MaxHistory>30</MaxHistory>
+      <TimeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <MaxFileSize>10MB</MaxFileSize>
+      </TimeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>${PATTERN_LOG}</pattern>
+    </layout>
+  </appender>
+
+  <!-- QA（Warn日志） -->
+  <appender name="WARN-FILE"
+    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>${FILE_PATH}/warn/${moduleName}_warn.%d{yyyy-MM-dd}-%i.log
+      </FileNamePattern>
+      <MaxHistory>30</MaxHistory>
+      <TimeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <MaxFileSize>10MB</MaxFileSize>
+      </TimeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>WARN</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>${PATTERN_LOG}</pattern>
+    </layout>
+  </appender>
+
+  <!-- QA（Error日志） -->
+  <appender name="ERROR-FILE"
+    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <FileNamePattern>${FILE_PATH}/error/${moduleName}_error.%d{yyyy-MM-dd}-%i.log
+      </FileNamePattern>
+      <MaxHistory>30</MaxHistory>
+      <TimeBasedFileNamingAndTriggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <MaxFileSize>10MB</MaxFileSize>
+      </TimeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>${PATTERN_LOG}</pattern>
+    </layout>
+  </appender>
+
+  <!-- QA 环境配置 -->
+<!--  <springProfile name="qa">-->
+<!--    <logger name="cn.voicecomm.ai.voicesagex.console" level="DEBUG"/>-->
+<!--  </springProfile>-->
+  <!-- dev 环境配置 -->
+<!--  <springProfile name="dev">-->
+<!--    <logger name="cn.voicecomm.ai.voicesagex.console" level="DEBUG"/>-->
+<!--  </springProfile>-->
+
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="WARN-FILE"/>
+    <appender-ref ref="ERROR-FILE"/>
+  </root>
+
+
+</configuration>

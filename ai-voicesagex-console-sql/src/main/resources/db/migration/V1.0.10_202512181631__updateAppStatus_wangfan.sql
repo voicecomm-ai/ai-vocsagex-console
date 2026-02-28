@@ -1,0 +1,2 @@
+update application set status = 1 where type = 'agent' and EXISTS( select 1 from agent_publish_history b where b.application_id = application."id");
+update application set status = 1 where type = 'workflow' and EXISTS( select 1 from workflows_publish_history b where b.app_id = application."id");

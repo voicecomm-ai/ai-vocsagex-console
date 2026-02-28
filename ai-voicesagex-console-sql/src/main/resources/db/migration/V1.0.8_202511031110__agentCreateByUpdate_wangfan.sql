@@ -1,0 +1,1 @@
+update agent_info a set create_by = (select b.create_by from application b where a.application_id = b.id);

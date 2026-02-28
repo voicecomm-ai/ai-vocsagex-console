@@ -1,0 +1,11 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphKnowledgeFusionManageMapper">
+    <nql id = "getAllNgEdge" space="${ spaceId }" spaceFromParam="true" resultType = "com.vesoft.nebula.client.graph.data.ResultSet">
+        GO 1  STEPS from
+        ${entityId} OVER * BIDIRECT
+        YIELD DISTINCT dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,properties(edge) as property,rank(edge) as rank;
+    </nql>
+
+
+
+
+</mapper>

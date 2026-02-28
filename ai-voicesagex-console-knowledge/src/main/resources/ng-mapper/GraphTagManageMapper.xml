@@ -1,0 +1,97 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphTagManageMapper">
+<!--    <nql id = "createTag" space="${ tag.space }" spaceFromParam="true">-->
+<!--        CREATE TAG IF NOT EXISTS ${ tag.tagName }${ tag.properties }-->
+<!--        @if (isNotEmpty("${tag.ttlCol}") ) {-->
+<!--        TTL_DURATION = ${tag.ttlDuration}, TTL_COL = "${tag.ttlCol}" ;-->
+<!--        @}-->
+<!--    </nql>-->
+
+    <nql id = "createTag" space="${ tag.space }" spaceFromParam="true">
+        CREATE TAG IF NOT EXISTS `${ tag.tagName }` ${ tag.properties }
+    </nql>
+
+    <nql id = "dropTag" space="${ tag.space }" spaceFromParam="true" >
+        DROP TAG IF EXISTS  `${ tag.tagName }`;
+    </nql>
+
+    <nql id = "getTagInfo" space="${ tag.space }" spaceFromParam="true"  resultType = "com.vesoft.nebula.client.graph.data.ResultSet">
+        DESC TAG `${ tag.tagName }`
+    </nql>
+
+    <nql id = "getAllTags" space="${ tag.space }" spaceFromParam="true" resultType = "com.vesoft.nebula.client.graph.data.ResultSet">
+        SHOW  TAGS;
+    </nql>
+
+    <nql id = "createIndexDefault" space="${ index.space }" spaceFromParam="true">
+        CREATE TAG  INDEX IF NOT EXISTS `${ index.index }` ON `${ index.tagEdgeName }`(NAME(10));
+    </nql>
+
+
+    <nql id = "alterTag" space="${ tag.space }" spaceFromParam="true">
+        ALTER TAG `${ tag.tagName }` ADD (${ tag.properties });
+    </nql>
+
+    <nql id = "setTtl" space="${ tag.space }" spaceFromParam="true">
+        ALTER TAG `${ tag.tagName }` TTL_DURATION = ${tag.ttlDuration}, TTL_COL = "${tag.ttlCol}" ;
+    </nql>
+
+    <nql id = "dropIndex" space="${ tag.space }" spaceFromParam="true" >
+        DROP TAG INDEX `${ tag.index }`;
+    </nql>
+
+    <nql id = "dropTagEdgeProperty" space="${ tag.space }" spaceFromParam="true" >
+        ALTER TAG `${ tag.tagName }`  drop (`${ tag.propertyName }`);
+    </nql>
+
+    <nql id = "updateTagEdgeProperty" space="${ tag.space }" spaceFromParam="true" >
+        ALTER TAG `${ tag.tagName }`  CHANGE (${tag.properties});
+    </nql>
+
+
+    <nql id = "dropTagEdgeTtl" space="${ tag.space }" spaceFromParam="true">
+        ALTER TAG `${ tag.tagName }` TTL_DURATION = 0, TTL_COL = "";
+    </nql>
+
+
+    <nql id = "getPatternAllTags" space="${ spaceId }" spaceFromParam="true" resultType = "com.vesoft.nebula.client.graph.data.ResultSet">
+        SHOW  TAGS;
+    </nql>
+
+    <nql id = "getTagForId" space="${ spaceId }" spaceFromParam="true" resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+        MATCH (v) WHERE id(v) in ${id}  RETURN id(v) as id , tags(v)  as tagName ;
+    </nql>
+
+
+    <nql id = "getVertex" space="${ spaceId }" spaceFromParam="true" resultType = "org.nebula.contrib.ngbatis.models.data.NgVertex">
+        MATCH (v:${tag})
+        RETURN v;
+    </nql>
+
+    <nql id = "startInit" space="${ spaceId }" spaceFromParam="true" >
+        SUBMIT JOB STATS;
+    </nql>
+
+
+    <nql id = "startInit" space="${ spaceId }" spaceFromParam="true" resultType="java.lang.Integer" >
+        SUBMIT JOB STATS;
+    </nql>
+    <nql id = "showJobInfo" space="${ spaceId }" spaceFromParam="true" >
+        SHOW JOB ${id};
+    </nql>
+
+    <nql id = "stopJob" space="${ spaceId }" spaceFromParam="true" >
+        STOP JOB  ${id};
+    </nql>
+
+    <nql id = "createDocumentTag" space="${doc.spaceId}" spaceFromParam="true" >
+        CREATE TAG IF NOT EXISTS `${ doc.tagName }` (${ doc.propertyName })
+    </nql>
+
+    <nql id = "rebuildTagIndex" space="${spaceId}" spaceFromParam="true" >
+        REBUILD TAG INDEX `${ tagName }`;
+    </nql>
+    <nql id = "rebuildEdgeIndex" space="${spaceId}" spaceFromParam="true" >
+        REBUILD EDGE INDEX `${ edgeName }`;
+    </nql>
+
+</mapper>

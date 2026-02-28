@@ -1,0 +1,33 @@
+server:
+  servlet:
+    context-path: /voicesagex-console/authorization-web
+spring:
+  application:
+    name: ai-voicesagex-console-authorization
+  cloud:
+    nacos:
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        file-extension: yaml
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        username: ${NACOS_NAMESPACE:}
+        password: ${NACOS_GROUP:DEFAULT_GROUP}
+        shared-configs:
+          - data-id: ai-voicesagex-console-database.yaml
+            group: ${NACOS_GROUP:DEFAULT_GROUP}
+            refresh: true
+          - data-id: ai-voicesagex-console-common.yaml
+            group: ${NACOS_GROUP:DEFAULT_GROUP}
+            refresh: true
+          - data-id: ai-voicesagex-console-redis.yaml
+            group: ${NACOS_GROUP:DEFAULT_GROUP}
+            refresh: true
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        username: ${NACOS_NAMESPACE:}
+        password: ${NACOS_GROUP:DEFAULT_GROUP}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}

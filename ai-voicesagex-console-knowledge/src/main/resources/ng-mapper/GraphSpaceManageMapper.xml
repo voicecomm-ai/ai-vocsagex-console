@@ -1,0 +1,33 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphSpaceManageMapper">
+    <nql id="createSpace"  space="null" spaceFromParam="true">
+        CREATE SPACE  IF NOT EXISTS `${ space.space }`
+        (partition_num = ${ space.partitionNum }, replica_factor = ${ space.replicaFactor },vid_type = ${ space.fixedType });
+    </nql>
+
+    <nql id="createSpaceDefault"  space="null" spaceFromParam="true">
+        CREATE SPACE  IF NOT EXISTS `${ space.space }`
+        (partition_num = 2, replica_factor = 1 , vid_type = ${ space.fixedType });
+    </nql>
+
+    <nql id="cloneSpace"  space="null" spaceFromParam="true">
+        CREATE SPACE  IF NOT EXISTS `${ space.space }`
+        AS ${ space.model } ;
+    </nql>
+
+    <nql id="showSpaces" resultType="com.vesoft.nebula.client.graph.data.ResultSet"  space="null" spaceFromParam="true">
+        SHOW SPACES;
+    </nql>
+
+
+    <nql id = "descSpace" resultType="java.util.Map" space="${ spaceName }" spaceFromParam="true">
+        DESC space `${ spaceName }`
+    </nql>
+
+    <nql id = "dropSpace" space="null" spaceFromParam="true" >
+     DROP SPACE IF EXISTS  `${ spaceName }`;
+    </nql>
+
+
+
+
+</mapper>

@@ -1,0 +1,259 @@
+<mapper namespace="cn.voicecomm.ai.voicesagex.console.knowledge.mapper.GraphEdgeMapper">
+  <nql id="dropRelation" space="${ re.spaceId }" spaceFromParam="true">
+    DELETE EDGE `${re.edgeName}` ${re.properties}${re.rank};
+  </nql>
+
+
+  <nql id="saveRelation" space="${ re.spaceId }" spaceFromParam="true">
+    INSERT EDGE `${re.edgeName}` (${re.entityProperties}) VALUES "${re.subjectId}"->"${re.objectId}"
+    ${re.rank}:(${re.entityValue});
+  </nql>
+
+  <nql id="saveRelationNoRank" space="${ re.spaceId }" spaceFromParam="true">
+    INSERT EDGE `${re.edgeName}` (${re.entityProperties}) VALUES "${re.subjectId}"->"${re.objectId}"
+    :(${re.entityValue});
+  </nql>
+
+
+  <nql id="saveRelationBatch" space="${ re.spaceId }" spaceFromParam="true">
+    INSERT EDGE `${re.edgeName}` (${re.entityProperties}) VALUES ${re.entityPropertiesBath};
+  </nql>
+
+  <nql id="getObjects" space="${ tx.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:`${tx.objectTagName}`)
+    WHERE v.`${tx.objectTagName}`.NAME == '${tx.objectName}'
+    RETURN v;
+  </nql>
+
+  <nql id="getSubjects" space="${ tx.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:`${tx.subjectTagName}`)
+    WHERE v.`${tx.subjectTagName}`.NAME == '${tx.subjectName}'
+    RETURN v;
+  </nql>
+
+
+  <nql id="getObjectsSingle" space="${ tx.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:`${tx.objectTagName}`)
+    WHERE id(v) == '${tx.objectId}'
+    RETURN v;
+  </nql>
+
+  <nql id="getSubjectsSingle" space="${ tx.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:`${tx.subjectTagName}`)
+    WHERE id(v) == '${tx.subjectId}'
+    RETURN v;
+  </nql>
+
+  <nql id="getAllEdge" space="${ er.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v
+    ${ isEmpty( er.subjectTagName ) ? '' : ( ':' + er.subjectTagName ) })-[e:`${er.edgeName}`]->(v1
+    ${ isEmpty( er.objectTagName ) ? '' : ( ':' + er.objectTagName ) })
+    WHERE 1 == 1
+    @if ( isNotEmpty( er.subjectName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${er.subjectName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${er.subjectName}')
+    @}
+    RETURN e;
+  </nql>
+
+
+  <nql id="getAllEntity" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:`${tagName}`)
+    RETURN v;
+  </nql>
+
+
+  <nql id="getEdgeTotal" space="${ spaceId }" spaceFromParam="true" resultType="java.lang.Integer">
+    MATCH (v)-[e]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN COUNT(e) AS count;
+  </nql>
+
+  <nql id="getVertexesLimit" space="${ er.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v ${ isEmpty( er.subjectTagName ) ? '' : ( ':' + er.subjectTagName ) })-[e]->(v1
+    ${ isEmpty( er.objectTagName ) ? '' : ( ':' + er.objectTagName ) })
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( er.subjectName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${er.subjectName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${er.subjectName}')
+    @}
+    RETURN e ,rank(e) as rank ORDER BY rank DESC SKIP ${ er.current } LIMIT ${ er.pageSize };
+  </nql>
+
+
+  <nql id="getVertexesLimitByEdgeByName" space="${ er.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v
+    ${ isEmpty( er.subjectTagName ) ? '' : ( ':' + er.subjectTagName ) })-[e:`${er.edgeName}`]->(v1
+    ${ isEmpty( er.objectTagName ) ? '' : ( ':' + er.objectTagName ) })
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( er.subjectName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${er.subjectName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${er.subjectName}')
+    @}
+    RETURN e ,rank(e) as rank ORDER BY rank DESC SKIP ${ er.current } LIMIT ${ er.pageSize };
+  </nql>
+
+  <nql id="getSumEdge" space="${ re.spaceId }" spaceFromParam="true" resultType="java.lang.Integer">
+    MATCH (v ${ isEmpty( re.subjectTagName ) ? '' : ( ':' + re.subjectTagName ) })-[e]->(v1
+    ${ isEmpty( re.objectTagName ) ? '' : ( ':' + re.objectTagName ) })
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( re.subjectName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${re.subjectName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${re.subjectName}')
+    @}
+    RETURN count(*) as total;
+  </nql>
+
+  <nql id="getSumEdgeByEdge" space="${ re.spaceId }" spaceFromParam="true"
+    resultType="java.lang.Integer">
+    MATCH (v
+    ${ isEmpty( re.subjectTagName ) ? '' : ( ':' + re.subjectTagName ) })-[e:`${re.edgeName}`]->(v1
+    ${ isEmpty( re.objectTagName ) ? '' : ( ':' + re.objectTagName ) })
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( re.subjectName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${re.subjectName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${re.subjectName}')
+    @}
+    RETURN count(*) as total;
+  </nql>
+
+
+  <nql id="getVertexesLimitByEdge" space="${ er.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH ()-[e:${er.edgeName}]->()
+    RETURN e SKIP ${ er.current } LIMIT ${ er.pageSize };
+  </nql>
+
+  <nql id="getNumber" space="${ spaceId }" spaceFromParam="true" resultType="java.lang.Long">
+    MATCH (v)-[e:`${ edgeName }`]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN COUNT(e) AS count;
+  </nql>
+
+  <nql id="getAllNumber" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH ()-[e]->()
+    RETURN e;
+  </nql>
+
+
+  <nql id="getExportAllData" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v)-[e]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( entityName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${entityName}')
+    @}
+    @if ( isNotEmpty( subjectTagName ) ) {
+    AND '${subjectTagName}' in labels(v)
+    @}
+    @if ( isNotEmpty( objectTagName ) ) {
+    AND '${objectTagName}' in labels(v)
+    @}
+    RETURN e,properties(v).NAME as name ORDER BY name ASC;
+  </nql>
+
+  <nql id="getExportAllDataByEdgeName" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v
+    ${ isEmpty( subjectTagName ) ? '' : ( ':' + subjectTagName ) })-[e:`${tagEdgeName}`]->(v1
+    ${ isEmpty( objectTagName ) ? '' : ( ':' + objectTagName ) })
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    @if ( isNotEmpty( entityName ) ) {
+    AND lower(properties(v).NAME) CONTAINS lower('${entityName}')
+    OR lower(properties(v1).NAME) CONTAINS lower('${entityName}')
+    @}
+    RETURN e,properties(v).NAME as name ORDER BY name ASC ;
+  </nql>
+
+  <nql id="getEdgeInfo" space="${ re.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    FETCH PROP ON `${re.edgeName}` "${re.subjectId}" -> "${re.objectId}" ${re.rank} YIELD edge as e;
+  </nql>
+
+
+  <nql id="getEdgeInfoExcel" space="${ re.spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    MATCH (v1)-[e:`${re.edgeName}`]->(v2)
+    WHERE id(v1) == "${re.subjectId}" AND id(v2) == "${re.objectId}"
+    @if ( isNotEmpty( re.attributeMatch ) ) {
+    AND ${re.attributeMatch}
+    @}
+    RETURN properties(e) as e;
+  </nql>
+
+
+  <nql id="getEdgeInfoDocument" space="${ re.spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    MATCH (v)-[e:`${re.edgeName}`]->(v1)
+    WHERE id(v) == ${re.subjectId} and id(v1) == ${re.objectId}
+    RETURN e;
+  </nql>
+
+
+  <nql id="getEdges" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgEdge">
+    FETCH PROP ON `${edgeName}` ${entity} YIELD edge as e;
+  </nql>
+
+  <nql id="updateRelation" space="${ re.spaceId }" spaceFromParam="true">
+    UPDATE EDGE ON `${re.edgeName}` "${re.subjectId}" -> "${re.objectId}"
+    SET ${re.entityProperties}
+  </nql>
+
+  <nql id="getEntityTotalByProperty" space="${spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    MATCH (v)-[e:`${edgeName}`]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN ${propertyName} ;
+  </nql>
+
+  <nql id="batchSaveRelation" space="${ re.spaceId }" spaceFromParam="true">
+    INSERT EDGE `${re.edgeName}` () VALUES ${re.value};
+  </nql>
+
+
+  <nql id="getEntityInfo" space="${ spaceId }" spaceFromParam="true"
+    resultType="org.nebula.contrib.ngbatis.models.data.NgVertex">
+    MATCH (v:${tag})
+    WHERE v.${tag}.NAME == ${name}
+    RETURN v;
+  </nql>
+
+  <nql id="screenTag" space="${ spaceId }" spaceFromParam="true">
+    MATCH (v)-[e:`${edgeName}`]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN labels(v) AS t
+  </nql>
+
+  <nql id="screenTagModel" space="${ spaceId }" spaceFromParam="true">
+    MATCH (v)-[e:`${edgeName}`]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN labels(v) AS t,labels(v1) AS t1
+  </nql>
+
+
+  <nql id="screenTagObject" space="${ spaceId }" spaceFromParam="true">
+    MATCH (v)-[e:`${edgeName}`]->(v1)
+    WHERE 1 == 1 AND properties(v).NAME IS NOT NULL AND properties(v1).NAME IS NOT NULL
+    RETURN labels(v1) AS t
+  </nql>
+
+
+  <nql id="getAllNgEdge" space="${ spaceId }" spaceFromParam="true"
+    resultType="com.vesoft.nebula.client.graph.data.ResultSet">
+    GO 1 STEPS from
+    ${entityId} OVER * BIDIRECT
+    YIELD DISTINCT dst(edge) as dst, src(edge) as src ,type(edge) as edgeName,properties(edge) as
+    property,rank(edge) as rank;
+  </nql>
+</mapper>
